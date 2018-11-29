@@ -114,7 +114,7 @@ def main():
         item = futures.pop()
         if not item.ready():
             futures.append(item)
-            time.sleep(1)
+            time.sleep(0.05)
         else:
             try:
                 result = item.get(timeout=1)
@@ -132,7 +132,7 @@ def main():
     # parsingPool.shutdown(wait=True)
     parsingPool.close()
     parsingPool.join()
-    logger.info("Finished in %.3f at %.3f", time.time()-start_time, cnt/(time.time()-start_time))
+    logger.info("Finished in %.3f seconds at %.3f lines/sec", time.time()-start_time, cnt/(time.time()-start_time))
 
 
 if __name__ == "__main__":
