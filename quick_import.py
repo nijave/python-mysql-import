@@ -13,9 +13,9 @@ logging.basicConfig(
     format='%(asctime)s %(levelname)-8s %(message)s'
 )
 
-SQL_WORKERS = 4
+SQL_WORKERS = 8
 MAX_LINE_LENGTH = 255
-INSERT_BATCH_SIZE = 25000
+INSERT_BATCH_SIZE = 10000
 # How often to report progress
 REPORT_EVERY_COUNT = 10000
 MYSQL_DB_DETAILS = {
@@ -96,7 +96,7 @@ def process_lines(query, headers, batch, cnt, start_time):
     conn.close()
     insert_time = time.time() - insert_start
 
-    logger.info("Insert %d lines of %d (%.3f lines/sec) in %.2f (%.3f inserts/sec)",
+    logger.info("Inserted %d of %d (%.3f lines/sec) in %.2f seconds (%.3f inserts/sec in this process)",
                 insert_cnt, cnt, cnt/(time.time()-start_time), insert_time, insert_cnt/insert_time)
 
 
