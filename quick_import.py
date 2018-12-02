@@ -26,34 +26,7 @@ MYSQL_DB_DETAILS = {
 }
 TABLE_NAME = "tickets"
 FILE_NAME = 'Parking_Violations_Issued_-_Fiscal_Year_2017.csv'
-
-
-class MockFuture(object):
-    def __init__(self, value):
-        self.value = value
-
-    @staticmethod
-    def ready():
-        return True
-
-    def get(self, *args, **kwargs):
-        logger.info("Returning %s", self.value)
-        return self.value
-
-
-class MockParsingPool(object):
-    def __init__(self, *args, **kwargs):
-        pass
-
-    @staticmethod
-    def apply_async(*args):
-        func = args[0]
-        logger.info("Executing %s", func)
-        return MockFuture(func(*args[1]))
-
-    @staticmethod
-    def shutdown(*args, **kwargs):
-        return True
+FILE_DELIMITER = ","
 
 
 def create_table(headers, var_char_length):
@@ -79,7 +52,7 @@ def create_table(headers, var_char_length):
 
 def process_lines(query, headers, batch, cnt, start_time):
     lines = [line.decode("utf-8", "replace").encode("ascii", "replace").decode("utf-8") for line in batch]
-    reader = csv.reader(lines, delimiter=",")
+    reader = csv.reader(lines, delimiter=FILE_DELIMITER)
 
     csv_lines = []
     for line in reader:
@@ -104,8 +77,6 @@ if __name__ == "__main__":
     pr = cProfile.Profile()
     pr.enable()
     start_time = time.time()
-    # A mock to run everything in the same thread (I think multiprocessing might have one somewhere, though)
-    # parsing_pool = MockParsingPool(max_workers=WORKER_COUNT)
 
     # concurrent.futures ProcessExecutorPool Futures have a large overhead and are fairly slow
     # multiprocessing is much faster for tons of tiny jobs
@@ -122,7 +93,7 @@ if __name__ == "__main__":
     cnt = 0
     # Produce items
     with open(FILE_NAME, 'rb') as f:
-        headers = tuple([col .strip() for col in next(f).decode("utf-8").split(",")])
+        headers = tuple([col .strip() for col in next(f).decode("utf-8").split(FILE_DELIMITER)])
         create_table(headers, MAX_LINE_LENGTH)
         query += ",".join(["%s"] * len(headers)) + ")"
         for _line in f:
